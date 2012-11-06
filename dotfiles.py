@@ -32,7 +32,9 @@ class DotFilesRepo(object):
         return paths
 
     def get_dirty_files(self):
-        stdout, stderr = command(['git', 'status', '--short', '--untracked-files=no'], self.repo_path)
+        stdout, stderr = command(['git', 'status', '--short', '--untracked-files=no', '.'], self.repo_path)
+        if stdout.strip() == '':
+            return []
         paths = [line[3:] for line in stdout.strip().split('\n')]
         return paths
 

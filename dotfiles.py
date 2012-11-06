@@ -16,6 +16,14 @@ def command(cmd, cwd=None, allow_output_on_stderr=False):
     return stdout, stderr
 
 
+STATUS_UNLINKED = 'unlinked'
+STATUS_SYMLINKED = 'symlinked'
+STATUS_HARDLINKED = 'hardlinked'
+STATUS_DIRTY = 'dirty'
+STATUS_CLEAN = 'clean'
+STATUS_UNTRACKED = 'untracked'
+
+
 class DotFilesRepo(object):
 
     def __init__(self, repo_path):
@@ -41,11 +49,11 @@ class DotFilesRepo(object):
     def get_repo_status(self):
         status_dict = {}
         for f in self.get_untracked_files():
-            status_dict[f] = 'untracked'
+            status_dict[f] = STATUS_UNTRACKED
         for f in self.get_tracked_files():
-            status_dict[f] = 'tracked'
+            status_dict[f] = STATUS_CLEAN
         for f in self.get_dirty_files():
-            status_dict[f] = 'dirty'
+            status_dict[f] = STATUS_DIRTY
         return status_dict
 
 
@@ -60,7 +68,7 @@ def get_link_status(files, home_path, repo_path):
         repo_file = os.path.join(repo_path, file)
 
         # Start with not linked by default
-        status_dict[file] = 'not linked'
+        status_dict[file] = STATUS_UNLINKED
         # Stat home file
         stat_info = os.lstat(home_file)
         # Check for symlink
@@ -68,10 +76,10 @@ def get_link_status(files, home_path, repo_path):
             target = os.readlink(home_file)
             target = os.path.join(os.path.dirname(home_file), target)
             if os.path.realpath(target) == os.path.realpath(repo_file):
-                status_dict[file] = 'symlinked'
+                status_dict[file] = STATUS_SYMLINKED
         # Check for hard link
         elif stat_info.st_ino == os.stat(repo_file).st_ino:
-            status_dict[file] = 'hardlinked'
+            status_dict[file] = STATUS_HARDLINKED
     return status_dict
 
 
@@ -85,8 +93,23 @@ def overview(home_path, repo_path):
     file_max_width = max([len(f) for f in repo_status_dict.keys()])
     repo_status_max_width = max([len(s) for s in repo_status_dict.values()])
     link_status_max_width = max([len(s) for s in link_status_dict.values()])
-    for file, status in repo_status_dict.items():
-        print file.ljust(file_max_width + 2), status.center(repo_status_max_width + 2), link_status_dict[file].center(link_status_max_width + 2)
+    repo_status_colors = {
+        STATUS_CLEAN: '\033[32;m',
+        STATUS_DIRTY: '\033[31;m',
+        STATUS_UNTRACKED: '\033[0m',
+    }
+    link_status_colors = {
+        STATUS_HARDLINKED: '\033[32;m',
+        STATUS_SYMLINKED: '\033[32;m',
+        STATUS_UNLINKED: '\033[0m',
+    }
+    color_reset = '\033[0m'
+    for file, repo_status in repo_status_dict.items():
+        link_status = link_status_dict[file]
+        sys.stdout.write(file.ljust(file_max_width + 2))
+        sys.stdout.write(repo_status_colors[repo_status] + repo_status.center(repo_status_max_width + 2) + color_reset)
+        sys.stdout.write(link_status_colors[link_status] + link_status.center(link_status_max_width + 2) + color_reset)
+        sys.stdout.write('\n')
 
 
 def main():

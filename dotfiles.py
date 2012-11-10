@@ -43,7 +43,7 @@ class DotFilesRepo(object):
         stdout, stderr = command(['git', 'status', '--short', '--untracked-files=no', '.'], self.repo_path)
         if stdout.strip() == '':
             return []
-        paths = [line[3:] for line in stdout.strip().split('\n')]
+        paths = [line[3:] for line in stdout.rstrip().split('\n')]
         return paths
 
     def get_repo_status(self):
@@ -80,6 +80,9 @@ def get_link_status(files, home_path, repo_path):
         # Check for hard link
         elif stat_info.st_ino == os.stat(repo_file).st_ino:
             status_dict[file] = STATUS_HARDLINKED
+
+        #TODO: when not linked: diff or no diff?
+
     return status_dict
 
 

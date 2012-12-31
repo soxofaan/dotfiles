@@ -22,6 +22,7 @@ STATUS_HARDLINKED = 'hardlinked'
 STATUS_DIRTY = 'dirty'
 STATUS_CLEAN = 'clean'
 STATUS_UNTRACKED = 'untracked'
+STATUS_INEXISTENT = 'inexistent'
 
 
 class DotFilesRepo(object):
@@ -67,6 +68,10 @@ def get_link_status(files, home_path, repo_path):
         home_file = os.path.join(home_path, file)
         repo_file = os.path.join(repo_path, file)
 
+        if not os.path.exists(home_file):
+            status_dict[file] = STATUS_INEXISTENT
+            continue
+
         # Start with not linked by default
         status_dict[file] = STATUS_UNLINKED
         # Stat home file
@@ -105,6 +110,7 @@ def overview(home_path, repo_path):
         STATUS_HARDLINKED: '\033[32;m',
         STATUS_SYMLINKED: '\033[32;m',
         STATUS_UNLINKED: '\033[0m',
+        STATUS_INEXISTENT: '\033[33;m',
     }
     color_reset = '\033[0m'
     for file, repo_status in repo_status_dict.items():

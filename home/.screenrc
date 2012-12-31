@@ -4,7 +4,7 @@ shelltitle ''
 # Set the window caption.
 # I use caption instead of hardstatus, so it is available per split window too
 # (hardstatus is only per complete screen).
- caption always "%{= KW}%-Lw%{= wb}%n %t %{= KW}%+Lw %-=| ${USER}@%H | %M%d %c%{-}"
+caption always "%{= KW}%-Lw%{= wb}%n %t %{= KW}%+Lw %-=| ${USER}@%H | %M%d %c%{-}"
 # Some decryption hints:
 # %{= KW}     background light black (aka dark gray) with foreground light white
 # %{= wb}     background dark white (ake light gray) with foreground dark blue

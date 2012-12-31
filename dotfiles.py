@@ -100,7 +100,6 @@ def overview(home_path, repo_path):
     link_status_dict = get_link_status(repo_status_dict.keys(), home_path, repo_path)
 
     file_max_width = max([len(f) for f in repo_status_dict.keys()])
-    repo_status_max_width = max([len(s) for s in repo_status_dict.values()])
     link_status_max_width = max([len(s) for s in link_status_dict.values()])
     repo_status_colors = {
         STATUS_GIT_CLEAN: '\033[32;m',
@@ -116,9 +115,15 @@ def overview(home_path, repo_path):
     color_reset = '\033[0m'
     for file, repo_status in repo_status_dict.items():
         link_status = link_status_dict[file]
-        sys.stdout.write(file.ljust(file_max_width + 2))
-        sys.stdout.write(repo_status_colors[repo_status] + repo_status.center(repo_status_max_width + 2) + color_reset)
-        sys.stdout.write(link_status_colors[link_status] + link_status.center(link_status_max_width + 2) + color_reset)
+        # File name under home_path.
+        sys.stdout.write(('~/' + file).ljust(file_max_width + 2))
+        # Link status.
+        sys.stdout.write(' ' + link_status_colors[link_status] + link_status.ljust(link_status_max_width) + color_reset + ' ')
+        # Repo file name.
+        sys.stdout.write(os.path.normpath(os.path.join(repo_path, file)))
+        # Repo file status.
+        sys.stdout.write(' ' + repo_status_colors[repo_status] + '(' + repo_status + ')' + color_reset)
+
         sys.stdout.write('\n')
 
 
@@ -131,4 +136,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
